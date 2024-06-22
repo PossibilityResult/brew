@@ -46,7 +46,10 @@ module Cask
         Formatter.error("does not exist")
       end
 
-      "Installed\n#{versioned_staged_path} (#{path_details})\n"
+      tab = Tab.for_cask(cask)
+      tab_details = "\n  #{tab}" if tab.tabfile&.exist?
+
+      "Installed\n#{versioned_staged_path} (#{path_details})#{tab_details}\n"
     end
 
     def self.name_info(cask)

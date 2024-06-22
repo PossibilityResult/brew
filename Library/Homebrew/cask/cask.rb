@@ -7,6 +7,7 @@ require "cask/cask_loader"
 require "cask/config"
 require "cask/dsl"
 require "cask/metadata"
+require "cask/tab"
 require "utils/bottles"
 require "extend/api_hashable"
 
@@ -207,6 +208,10 @@ module Cask
     sig { returns(T.nilable(String)) }
     def bundle_long_version
       bundle_version&.version
+    end
+
+    def tab
+      Tab.for_cask(self)
     end
 
     def config_path
