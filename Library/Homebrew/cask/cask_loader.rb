@@ -268,16 +268,26 @@ module Cask
       def self.try_new(ref, warn: false)
         return if Homebrew::EnvConfig.no_install_from_api?
         return unless ref.is_a?(String)
-        return unless (token = ref[HOMEBREW_DEFAULT_TAP_CASK_REGEX, :token])
-        if !Homebrew::API::Cask.all_casks.key?(token) &&
-           !Homebrew::API::Cask.all_renames.key?(token)
-          return
+
+        token = parse_token(ref)
+        token ||= begin
+          ref = CoreCaskTap.instance.tap_migration_renames[ref]
+          parse_token(ref) if ref
         end
+        return unless token
 
         ref = "#{CoreCaskTap.instance}/#{token}"
 
         token, tap, = CaskLoader.tap_cask_token_type(ref, warn:)
         new("#{tap}/#{token}")
+      end
+
+      sig { params(ref: String).returns(T.nilable(String)) }
+      private_class_method def self.parse_token(ref)
+        return unless (token = ref[HOMEBREW_DEFAULT_TAP_CASK_REGEX, :token])
+        return token if Homebrew::API::Cask.all_casks.key?(token)
+
+        token if Homebrew::API::Cask.all_renames.key?(token)
       end
 
       sig { params(token: String, from_json: Hash, path: T.nilable(Pathname)).void }

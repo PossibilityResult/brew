@@ -1284,6 +1284,19 @@ class CoreTap < AbstractCoreTap
     end
   end
 
+  # External formula names to core formula renames
+  sig { returns(T::Hash[String, String]) }
+  def tap_migration_renames
+    @tap_migration_renames ||= Tap.each_with_object({}) do |tap, hash|
+      tap.tap_migrations.each do |old_name, new_name|
+        next unless new_name.start_with?("homebrew/core/")
+
+        hash[old_name] = new_name
+        hash["#{tap}/#{old_name}"] = new_name
+      end
+    end
+  end
+
   sig { returns(T::Array[String]) }
   def autobump
     @autobump ||= begin
@@ -1453,6 +1466,19 @@ class CoreCaskTap < AbstractCoreTap
       migrations, = Homebrew::API.fetch_json_api_file "cask_tap_migrations.jws.json",
                                                       stale_seconds: TAP_MIGRATIONS_STALE_SECONDS
       migrations
+    end
+  end
+
+  # External cask names to core cask renames
+  sig { returns(T::Hash[String, String]) }
+  def tap_migration_renames
+    @tap_migration_renames ||= Tap.each_with_object({}) do |tap, hash|
+      tap.tap_migrations.each do |old_name, new_name|
+        next unless new_name.start_with?("homebrew/cask/")
+
+        hash[old_name] = new_name
+        hash["#{tap}/#{old_name}"] = new_name
+      end
     end
   end
 
